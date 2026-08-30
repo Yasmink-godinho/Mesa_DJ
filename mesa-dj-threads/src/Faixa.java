@@ -52,7 +52,7 @@ public class Faixa  implements Runnable {
             return;
         }
         bpm = novoBpm;
-        System.out.println("\n🎚️ [" + nome + "] novo BPM: " + novoBpm);
+        System.out.println("\n [" + nome + "] novo BPM: " + novoBpm);
 
         if (clip != null && clip.isOpen()) {
             try{

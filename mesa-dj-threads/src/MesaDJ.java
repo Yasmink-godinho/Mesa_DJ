@@ -38,7 +38,7 @@ public class MesaDJ { // Controla as ações do usuário (botões) e repassa par
 
         if (faixa.isTocando()) {
             // Feedback pro usuário: clicar em "tocar" numa faixa que já está tocando não deveria fazer nada de errado, mas é bom avisar.
-            System.out.println("⚠️  Faixa " + numeroFaixa + " já está tocando.");
+            System.out.println("  Faixa " + numeroFaixa + " já está tocando.");
             return;
         }
 
@@ -50,7 +50,7 @@ public class MesaDJ { // Controla as ações do usuário (botões) e repassa par
         if (faixa == null) return;
 
         if (!faixa.isTocando()) {
-            System.out.println("⚠️  Faixa " + numeroFaixa + " já está pausada.");
+            System.out.println("  Faixa " + numeroFaixa + " já está pausada.");
             return;
         }
 
@@ -63,7 +63,7 @@ public class MesaDJ { // Controla as ações do usuário (botões) e repassa par
     // A MesaDJ não reimplementa essa decisão — apenas repassa o pedido.
     public void alternarPausaTudo() {
         if (musicaAtual == null) {
-            System.out.println("❌ Erro: nenhuma música carregada.");
+            System.out.println(" Erro: nenhuma música carregada.");
             return;
         }
         musicaAtual.alternarPausaGlobal();
@@ -71,7 +71,7 @@ public class MesaDJ { // Controla as ações do usuário (botões) e repassa par
 
     public void alternarMuteTudo() { // Ação: MUTAR/DESMUTAR TUDO (toggle).
         if (musicaAtual == null) {
-            System.out.println("❌ Erro: nenhuma música carregada.");
+            System.out.println(" Erro: nenhuma música carregada.");
             return;
         }
         musicaAtual.alternarMaster();
@@ -94,7 +94,7 @@ public class MesaDJ { // Controla as ações do usuário (botões) e repassa par
     }
 
     public void sair() { // Ação: SAIR — pede para a Musica parar e liberar todas as faixas
-        System.out.println("\n🛑 Encerrando a Mesa DJ...");
+        System.out.println("\n Encerrando a Mesa DJ...");
 
         if (musicaAtual != null) {
             musicaAtual.pararFaixas();
@@ -107,13 +107,13 @@ public class MesaDJ { // Controla as ações do usuário (botões) e repassa par
     // de erro duplicadas espalhadas pelo código.
     private Faixa buscarFaixa(int numeroFaixa) {
         if (musicaAtual == null) {
-            System.out.println("❌ Erro: nenhuma música carregada.");
+            System.out.println(" Erro: nenhuma música carregada.");
             return null;
         }
 
         Map<Integer, Faixa> faixas = musicaAtual.getFaixas();
         if (faixas == null || !faixas.containsKey(numeroFaixa)) {
-            System.out.println("❌ Erro: faixa " + numeroFaixa + " não encontrada.");
+            System.out.println(" Erro: faixa " + numeroFaixa + " não encontrada.");
             return null;
         }
 
