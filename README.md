@@ -64,10 +64,10 @@ mesa-dj-threads/
 
 | Pessoa | Responsabilidade |
 |---|---|
-| Yasmim | Áudio / Instrumento (`Faixa.java`) |
-| Lari | Mesa DJ / Comandos (`MesaDJ.java`) |
+| Yasmin | Áudio / Instrumento (`Faixa.java`) |
+| Larissa | Mesa DJ / Comandos (`MesaDJ.java`) |
 | Diogo | Threads / Sincronização e testes de concorrência |
 | Kezia | Status / Painel visual das faixas |
-| Thay | Desafio extra (BPM/velocidade) |
+| Thayná | Desafio extra (BPM/velocidade) |
 | João Rafael | Integração — GitHub, testes e resolução de conflitos |
-| Bela | Documentação / Apresentação |
+| Isabela | Documentação / Apresentação |
