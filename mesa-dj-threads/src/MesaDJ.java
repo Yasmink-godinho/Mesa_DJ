@@ -77,6 +77,46 @@ public class MesaDJ { // Controla as ações do usuário (botões) e repassa par
         musicaAtual.alternarMaster();
     }
 
+    // Define o BPM de todas as faixas
+public void definirBpmGlobal(int novoBpm) {
+    if (musicaAtual == null) {
+        System.out.println("Erro: nenhuma música carregada.");
+        return;
+    }
+
+    if (novoBpm < 40 || novoBpm > 240) {
+        System.out.println("X BPM inválido. Use um valor entre 40 e 240.");
+        return;
+    }
+
+    for (Faixa faixa : musicaAtual.getFaixas().values()) {
+        faixa.setBpm(novoBpm);
+    }
+
+    System.out.println("BPM global definido para " + novoBpm + ".");
+}
+
+    // Define o BPM de uma faixa específica
+    public void definirBpmFaixa(int numeroFaixa, int novoBpm) {
+        Faixa faixa = buscarFaixa(numeroFaixa);
+
+        if (faixa == null) {
+            return;
+        }
+
+        faixa.setBpm(novoBpm);
+    }
+
+    // Aumenta ou diminui o BPM de todas as faixas
+    public void ajustarBpmGlobal(int delta) {
+        if (musicaAtual == null) {
+            System.out.println("Erro: nenhuma música carregada.");
+            return;
+        }
+
+        musicaAtual.ajustarBpmGlobal(delta);
+    }
+    
     public Map<Integer, String> status() { // Ação: STATUS — retorna dados crus (tecla -> "Nome: ESTADO"), sem formatação visual
         Map<Integer, String> statusAtual = new LinkedHashMap<>();
 
@@ -119,4 +159,4 @@ public class MesaDJ { // Controla as ações do usuário (botões) e repassa par
 
         return faixas.get(numeroFaixa);
     }
-}
+}  

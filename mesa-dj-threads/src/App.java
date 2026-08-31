@@ -33,10 +33,31 @@ public class App {
 
         exibirInstrucoes(musicaAtual);
 
+        
         while (executando) {
             System.out.print("\nComando > ");
             String entrada = scanner.nextLine().trim().toLowerCase();
 
+            if (entrada.equals("bpm+")) {
+            mesa.ajustarBpmGlobal(10);
+            continue;
+             }
+
+            
+             if (entrada.equals("bpm-")) {
+            mesa.ajustarBpmGlobal(-10);
+            continue;
+             }
+            
+             if (entrada.startsWith("bpm ")) {
+            try {
+                int novoBpm = Integer.parseInt(entrada.substring(4));
+                mesa.definirBpmGlobal(novoBpm);
+            } catch (NumberFormatException e) {
+                System.out.println("X BPM inválido. Digite, por exemplo: bpm 140");
+            }
+            continue;
+          }
             // 1. Tocar faixa individual: apenas números (ex: "1", "2", "12", "18")
             if (entrada.matches("\\d+")) {
                 int numeroFaixa = Integer.parseInt(entrada);

@@ -1,38 +1,49 @@
-import java.io.File; // Localiza e abre o arquivo no sistema operacional
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.SourceDataLine;
 
-import javax.sound.sampled.AudioInputStream; // Decodifica o arquivo de áudio (.wav)
-import javax.sound.sampled.AudioSystem; // Utilitário central de áudio nativo do Java
-import javax.sound.sampled.Clip; // Interface para carregar áudio em RAM e controlar reprodução
-import javax.sound.sampled.FloatControl; // Controle nativo de parâmetros de áudio (velocidade/sample rate)
+public class Faixa implements Runnable {
 
-public class Faixa  implements Runnable {
-
-    // Atributos visuais e de controle
-    private int numeroTecla; // Número da tecla do teclado (ex: 1, 2, 3, 4)
+    private int numeroTecla;
     private String nome;
-    private String caminhoArquivo; // Caminho do arquivo de áudio (ex: "sons/bateria.wav")
-    private Clip clip; // Objeto dede reprodução de áudio carregado em memória RAM
-    private boolean tocando;
-    private boolean ativo;
-    private int bpm; 
+    private String caminhoArquivo;
 
-    // Construtor 
+    // Reprodução de áudio
+    private SourceDataLine linhaAudio;
+    private byte[] audioBytes;
+    private AudioFormat formato;
+
+    // Controle da faixa
+    private volatile boolean tocando;
+    private volatile boolean ativo;
+
+    // BPM
+    private volatile int bpm;
+
+    // Posição atual da música em frames
+    private volatile double posicaoFrame;
+
+    // Construtor
     public Faixa(String nome, String caminhoArquivo, int numeroTecla) {
         this.nome = nome;
         this.caminhoArquivo = caminhoArquivo;
         this.numeroTecla = numeroTecla;
+
         tocando = false;
         ativo = true;
-        bpm = 120; // Valor padrão de BPM
+        bpm = 120;
+        posicaoFrame = 0;
     }
 
-    //retorna o número da tecla associada à faixa
     public int getNumeroTecla() {
         return numeroTecla;
     }
 
-    //retorna o nome da faixa
     public String getNome() {
         return nome;
     }
@@ -45,104 +56,390 @@ public class Faixa  implements Runnable {
         return bpm;
     }
 
-     // synchronized: Altera a velocidade da batida (BPM)
+    // =========================================================
+    // CONTROLE DO BPM
+    // =========================================================
+
     public synchronized void setBpm(int novoBpm) {
-        if (novoBpm <= 0) {
-            System.out.println("X BPM inválido. Deve ser maior que zero.");
+
+        if (novoBpm < 40 || novoBpm > 240) {
+            System.out.println(
+                "X BPM inválido. Use um valor entre 40 e 240."
+            );
             return;
         }
-        bpm = novoBpm;
-        System.out.println("\n [" + nome + "] novo BPM: " + novoBpm);
 
-        if (clip != null && clip.isOpen()) {
-            try{
-                if(clip.isControlSupported(FloatControl.Type.SAMPLE_RATE)) { // Verifica se o controle de taxa de amostragem é suportado
-                    FloatControl controleVelociada = (FloatControl) clip.getControl(FloatControl.Type.SAMPLE_RATE); // Obtém o controle de taxa de amostragem
-                    float taxaOriginal = controleVelociada.getValue(); // Obtém a taxa de amostragem original
-                    float fator = (float) novoBpm / 120.0f; // Calcula o fator de ajuste com base no BPM desejado (assumindo 120 BPM como referência)
-                    controleVelociada.setValue(taxaOriginal * fator);
-                } else {
-                    System.out.println("⚠️ Controle de taxa de amostragem não suportado para [" + nome + "].");
-                }
-            } catch (Exception e) {
-                // Caso o driver de áudio não suporte alteração de Sample Rate em tempo real
-                System.out.println("ℹ Ajuste de hardware não suportado diretamente, valor lógico atualizado.");
-            }
-        }
+        bpm = novoBpm;
+
+        System.out.println(
+            "\n[" + nome + "] novo BPM: " + novoBpm
+        );
     }
 
-    public synchronized void alternar(){
-        if (clip == null){
-            return; // Se o clip não estiver carregado, não faz nada
+    // =========================================================
+    // TOCAR / PAUSAR
+    // =========================================================
+
+    public synchronized void alternar() {
+
+        if (linhaAudio == null) {
+            return;
         }
 
         if (tocando) {
-            clip.stop(); // Pausa a reprodução
+
             tocando = false;
-            System.out.println("\n⏸ [Tecla \"" + numeroTecla + "\"] [" + nome + "] foi PAUSADO.");
+
+            linhaAudio.stop();
+            linhaAudio.flush();
+
+            System.out.println(
+                "\n⏸ [Tecla \"" + numeroTecla + "\"] [" +
+                nome + "] foi PAUSADO."
+            );
+
         } else {
-            clip.setFramePosition(0); // Reinicia o áudio do início
-            clip.loop(Clip.LOOP_CONTINUOUSLY); // Configura para tocar em loop
-            clip.start(); // Inicia a reprodução 
+
+            // Alternar começa novamente do início
+            posicaoFrame = 0;
+
             tocando = true;
-            System.out.println("\n▶ [Tecla \"" + numeroTecla + "\"] [" + nome + "] voltou a TOCAR.");
+
+            linhaAudio.start();
+
+            System.out.println(
+                "\n▶ [Tecla \"" + numeroTecla + "\"] [" +
+                nome + "] voltou a TOCAR."
+            );
         }
     }
-    // synchronized: Pausa a emissão de som e corta a nota se estiver tocando
+
+    // =========================================================
+    // PAUSAR
+    // =========================================================
+
     public synchronized void pausar() {
-       if ( clip != null && clip.isRunning()) {
-            clip.stop(); // Pausa a reprodução
+
+        if (linhaAudio != null && tocando) {
+
             tocando = false;
-            System.out.println("\n⏸ [Tecla \"" + numeroTecla + "\"] [" + nome + "] foi PAUSADO.");
+
+            linhaAudio.stop();
+            linhaAudio.flush();
+
+            System.out.println(
+                "\n⏸ [Tecla \"" + numeroTecla + "\"] [" +
+                nome + "] foi PAUSADO."
+            );
         }
     }
 
-    // synchronized: Retoma a reprodução da faixa
+    // =========================================================
+    // RETOMAR
+    // =========================================================
+
     public synchronized void retomar() {
-        if (clip != null && !clip.isRunning() && ativo) {
-            clip.loop(Clip.LOOP_CONTINUOUSLY); // Configura para tocar em loop
-            clip.start(); // Retoma a reprodução
+
+        if (linhaAudio != null && !tocando && ativo) {
+
             tocando = true;
-            System.out.println("\n▶ [Tecla \"" + numeroTecla + "\"] [" + nome + "] voltou a TOCAR.");
+
+            linhaAudio.start();
+
+            System.out.println(
+                "\n▶ [Tecla \"" + numeroTecla + "\"] [" +
+                nome + "] voltou a TOCAR."
+            );
         }
-       
     }
 
-    // synchronized: Desliga o instrumento de forma segura
+    // =========================================================
+    // PARAR
+    // =========================================================
+
     public synchronized void parar() {
+
         ativo = false;
         tocando = false;
-        if (clip != null) {
-            clip.stop(); // Para a reprodução
-            clip.close(); // Libera os recursos do clip
-             
-            System.out.println("\n[Tecla \"" + numeroTecla + "\"] [" + nome + "] foi DESLIGADO.");
+
+        if (linhaAudio != null) {
+
+            linhaAudio.stop();
+            linhaAudio.flush();
+            linhaAudio.close();
+
+            System.out.println(
+                "\n[Tecla \"" + numeroTecla + "\"] [" +
+                nome + "] foi DESLIGADO."
+            );
         }
     }
 
+    // =========================================================
+    // CARREGAMENTO E THREAD
+    // =========================================================
 
-    @Override // Implementação do método run() da interface Runnable
+    @Override
     public void run() {
-       try {
-            File arquivo = new File(caminhoArquivo); // Localiza o arquivo de áudio
+
+        try {
+
+            File arquivo = new File(caminhoArquivo);
+
             if (!arquivo.exists()) {
-                System.err.println("Arquivo de áudio não encontrado: " + caminhoArquivo);
+
+                System.err.println(
+                    "Arquivo de áudio não encontrado: "
+                    + caminhoArquivo
+                );
+
                 return;
             }
-            // Decodifica o arquivo de áudio na memória ram e prepara para reprodução com latência zero
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(arquivo); // Decodifica o arquivo de áudio
-            clip = AudioSystem.getClip(); // Cria um objeto Clip para reprodução
-            clip.open(audioStream); // Carrega o áudio no Clip
-            System.out.println("\n[Tecla \"" + numeroTecla + "\"] [" + nome + "] carregado com sucesso.");
 
+            // Abre o WAV
+            AudioInputStream entrada =
+                AudioSystem.getAudioInputStream(arquivo);
+
+            AudioFormat formatoOriginal = entrada.getFormat();
+
+            // Converte para PCM 16 bits
+            formato = new AudioFormat(
+                AudioFormat.Encoding.PCM_SIGNED,
+                formatoOriginal.getSampleRate(),
+                16,
+                formatoOriginal.getChannels(),
+                formatoOriginal.getChannels() * 2,
+                formatoOriginal.getSampleRate(),
+                false
+            );
+
+            AudioInputStream pcmStream =
+                AudioSystem.getAudioInputStream(
+                    formato,
+                    entrada
+                );
+
+            // Carrega todo o áudio em memória
+            audioBytes = lerAudio(pcmStream);
+
+            pcmStream.close();
+            entrada.close();
+
+            // Cria a linha de reprodução
+            DataLine.Info info =
+                new DataLine.Info(
+                    SourceDataLine.class,
+                    formato
+                );
+
+            linhaAudio =
+                (SourceDataLine) AudioSystem.getLine(info);
+
+            linhaAudio.open(formato);
+
+            System.out.println(
+                "\n[Tecla \"" + numeroTecla + "\"] [" +
+                nome + "] carregado com sucesso."
+            );
+
+            // Começa parado
             while (ativo) {
-                Thread.sleep(100); // Mantém o loop ativo enquanto a faixa estiver ativa
+
+                if (!tocando) {
+
+                    Thread.sleep(20);
+
+                    continue;
+                }
+
+                reproduzirBloco();
             }
 
         } catch (Exception e) {
-            System.err.println("Erro ao carregar a faixa [" + nome + "]: " + e.getMessage()); // Exibe mensagem de erro caso ocorra algum
+
+            System.err.println(
+                "Erro ao carregar a faixa [" +
+                nome + "]: " + e.getMessage()
+            );
+        }
+    }
+
+    // =========================================================
+    // LEITURA DO ARQUIVO
+    // =========================================================
+
+    private byte[] lerAudio(AudioInputStream stream)
+            throws Exception {
+
+        ByteArrayOutputStream saida =
+            new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[8192];
+
+        int bytesLidos;
+
+        while ((bytesLidos = stream.read(buffer)) != -1) {
+
+            saida.write(
+                buffer,
+                0,
+                bytesLidos
+            );
         }
 
-        
+        return saida.toByteArray();
+    }
+
+    // =========================================================
+    // REPRODUÇÃO COM VELOCIDADE CONTROLADA
+    // =========================================================
+
+    private void reproduzirBloco() {
+
+        int canais = formato.getChannels();
+
+        int bytesPorFrame = canais * 2;
+
+        int totalFrames =
+            audioBytes.length / bytesPorFrame;
+
+        if (totalFrames == 0) {
+            return;
+        }
+
+        // Quantidade de frames que serão enviados
+        // para a placa de áudio de cada vez.
+        int framesSaida = 1024;
+
+        byte[] bufferSaida =
+            new byte[framesSaida * bytesPorFrame];
+
+        int framesGerados = 0;
+
+        while (
+            framesGerados < framesSaida
+            && tocando
+            && ativo
+        ) {
+
+            int frameAtual =
+                (int) posicaoFrame;
+
+            int frameProximo =
+                frameAtual + 1;
+
+            // Loop da música
+            if (frameAtual >= totalFrames) {
+
+                posicaoFrame = 0;
+
+                frameAtual = 0;
+                frameProximo = 1;
+            }
+
+            if (frameProximo >= totalFrames) {
+                frameProximo = 0;
+            }
+
+            double fracao =
+                posicaoFrame - frameAtual;
+
+            for (int canal = 0; canal < canais; canal++) {
+
+                int indiceAtual =
+                    frameAtual * bytesPorFrame
+                    + canal * 2;
+
+                int indiceProximo =
+                    frameProximo * bytesPorFrame
+                    + canal * 2;
+
+                short amostraAtual =
+                    lerShort(
+                        audioBytes,
+                        indiceAtual
+                    );
+
+                short amostraProxima =
+                    lerShort(
+                        audioBytes,
+                        indiceProximo
+                    );
+
+                // Interpolação entre os frames
+                double amostra =
+                    amostraAtual
+                    + (
+                        amostraProxima
+                        - amostraAtual
+                    ) * fracao;
+
+                short resultado =
+                    (short) Math.max(
+                        Short.MIN_VALUE,
+                        Math.min(
+                            Short.MAX_VALUE,
+                            Math.round(amostra)
+                        )
+                    );
+
+                int indiceSaida =
+                    framesGerados * bytesPorFrame
+                    + canal * 2;
+
+                // PCM little-endian
+                bufferSaida[indiceSaida] =
+                    (byte) (resultado & 0xFF);
+
+                bufferSaida[indiceSaida + 1] =
+                    (byte) ((resultado >> 8) & 0xFF);
+            }
+
+            /*
+             * BPM de referência:
+             *
+             * 120 BPM = velocidade normal
+             * 240 BPM = 2x mais rápido
+             * 60 BPM  = metade da velocidade
+             *
+             * O fator determina quantos frames do áudio
+             * original avançamos a cada frame reproduzido.
+             */
+            double velocidade =
+                (double) bpm / 120.0;
+
+            posicaoFrame += velocidade;
+
+            framesGerados++;
+        }
+
+        if (framesGerados > 0 && tocando && ativo) {
+
+            linhaAudio.write(
+                bufferSaida,
+                0,
+                framesGerados * bytesPorFrame
+            );
+        }
+    }
+
+    // =========================================================
+    // CONVERSÃO DE BYTES PARA SHORT
+    // =========================================================
+
+    private short lerShort(
+            byte[] dados,
+            int indice) {
+
+        int baixo =
+            dados[indice] & 0xFF;
+
+        int alto =
+            dados[indice + 1];
+
+        return (short) (
+            baixo
+            | (alto << 8)
+        );
     }
 }

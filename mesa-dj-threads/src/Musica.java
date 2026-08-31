@@ -41,18 +41,19 @@ public class Musica {
 
         // Instancia cada uma das 4 faixas associando-a ao nome, caminho do .wav e
         // número da tecla
-        faixas.put(1, new Faixa("Bateria", "audio/" + pasta + "/01 Kit Stem.wav", 1));
-        faixas.put(2, new Faixa("Baixo", "audio/" + pasta + "/04 Bass Stem.wav", 2));
-        faixas.put(3, new Faixa("Guitarra", "audio/" + pasta + "/08 Synth Stem.wav", 3));
-        faixas.put(4, new Faixa("Violão", "audio/" + pasta + "/05 Ld Voc Stem.wav", 4));
-        faixas.put(5, new Faixa("Voz Principal",   "audio/" + pasta + "/05 Ld Voc Stem.wav", 5));
-        faixas.put(6, new Faixa("Adlibs",          "audio/" + pasta + "/06 Adlibs Stem.wav", 6));
-        faixas.put(7, new Faixa("Backing Vocal",   "audio/" + pasta + "/07 BGV Stem.wav", 7));
-        faixas.put(8, new Faixa("Sintetizador",    "audio/" + pasta + "/08 Synth Stem.wav", 8));
-        faixas.put(9, new Faixa("Teclados",        "audio/" + pasta + "/09 Keys Stem.wav", 9));
-        faixas.put(10, new Faixa("Coral",           "audio/" + pasta + "/10 Choir Stem.wav", 10));
-        faixas.put(11, new Faixa("Hits",            "audio/" + pasta + "/11 Hits Stem.wav", 11));
-        faixas.put(12, new Faixa("Efeitos (FX)",    "audio/" + pasta + "/12 FX Stem.wav", 12));
+        
+        faixas.put(1, new Faixa("Bateria", "../audio/" + pasta + "/01 Kit Stem.wav", 1));
+        faixas.put(2, new Faixa("Baixo", "../audio/" + pasta + "/04 Bass Stem.wav", 2));
+        faixas.put(3, new Faixa("Guitarra", "../audio/" + pasta + "/08 Synth Stem.wav", 3));
+        faixas.put(4, new Faixa("Violão", "../audio/" + pasta + "/05 Ld Voc Stem.wav", 4));
+        faixas.put(5, new Faixa("Voz Principal", "../audio/" + pasta + "/05 Ld Voc Stem.wav", 5));
+        faixas.put(6, new Faixa("Adlibs", "../audio/" + pasta + "/06 Adlibs Stem.wav", 6));
+        faixas.put(7, new Faixa("Backing Vocal", "../audio/" + pasta + "/07 BGV Stem.wav", 7));
+        faixas.put(8, new Faixa("Sintetizador", "../audio/" + pasta + "/08 Synth Stem.wav", 8));
+        faixas.put(9, new Faixa("Teclados", "../audio/" + pasta + "/09 Keys Stem.wav", 9));
+        faixas.put(10, new Faixa("Coral", "../audio/" + pasta + "/10 Choir Stem.wav", 10));
+        faixas.put(11, new Faixa("Hits", "../audio/" + pasta + "/11 Hits Stem.wav", 11));
+        faixas.put(12, new Faixa("Efeitos (FX)", "../audio/" + pasta + "/12 FX Stem.wav", 12));
 
         // Cria e dispara uma Thread dedicada para cada faixa carregar seu Clip em
         // paralelo
