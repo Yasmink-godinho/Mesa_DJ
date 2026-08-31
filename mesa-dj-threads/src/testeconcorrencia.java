@@ -10,7 +10,8 @@ public class TesteConcorrencia {
 
         AtomicInteger totalDeErros = new AtomicInteger(0);
 
-        Musica musica = new Musica(1, "Musica-Teste", "teste");
+        // Usando "musica1" para carregar as faixas reais configuradas
+        Musica musica = new Musica(1, "Finesse - Teste", "musica1");
         musica.carregarFaixas();
         MesaDJ mesaDJ = new MesaDJ(musica);
 
@@ -28,7 +29,7 @@ public class TesteConcorrencia {
                 })
         );
 
-        // Camada 2: comandos globais (mexem nas 4 faixas de uma vez)
+        // Camada 2: comandos globais (mexem em todas as faixas de uma vez)
         System.out.println("\nCamada 2: atacando os comandos globais...");
         totalDeErros.addAndGet(
                 atacarComMultiplasThreads(6, 30, "Global-Pausa", mesaDJ::alternarPausaTudo)
@@ -95,7 +96,7 @@ public class TesteConcorrencia {
         return erros.get();
     }
 
-    // Depois de um ataque só com comandos globais, as 4 faixas devem estar no mesmo estado
+    // Depois de um ataque só com comandos globais, as faixas devem estar no mesmo estado
     private static boolean verificarConsistenciaDasFaixas(Musica musica) {
         long quantasTocando = musica.getFaixas().values().stream()
                 .filter(Faixa::isTocando)
@@ -105,4 +106,4 @@ public class TesteConcorrencia {
 
         return quantasTocando == 0 || quantasTocando == total;
     }
-} 
+}

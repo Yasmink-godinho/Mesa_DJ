@@ -1,5 +1,6 @@
 import java.util.LinkedHashMap; // Estrutura de dados que mantém a ordem de inserção das faixas
 import java.util.Map; // Interface para mapeamento de chave e valor
+import java.util.concurrent.CountDownLatch;
 
 // Representa a entidade Música, agrupando e gerenciando seus 4 canais concorrentes (stems)
 public class Musica {
@@ -41,24 +42,70 @@ public class Musica {
 
         // Instancia cada uma das 4 faixas associando-a ao nome, caminho do .wav e
         // número da tecla
-        
-        faixas.put(1, new Faixa("Bateria", "../audio/" + pasta + "/01 Kit Stem.wav", 1));
-        faixas.put(2, new Faixa("Baixo", "../audio/" + pasta + "/04 Bass Stem.wav", 2));
-        faixas.put(3, new Faixa("Guitarra", "../audio/" + pasta + "/08 Synth Stem.wav", 3));
-        faixas.put(4, new Faixa("Violão", "../audio/" + pasta + "/05 Ld Voc Stem.wav", 4));
-        faixas.put(5, new Faixa("Voz Principal", "../audio/" + pasta + "/05 Ld Voc Stem.wav", 5));
-        faixas.put(6, new Faixa("Adlibs", "../audio/" + pasta + "/06 Adlibs Stem.wav", 6));
-        faixas.put(7, new Faixa("Backing Vocal", "../audio/" + pasta + "/07 BGV Stem.wav", 7));
-        faixas.put(8, new Faixa("Sintetizador", "../audio/" + pasta + "/08 Synth Stem.wav", 8));
-        faixas.put(9, new Faixa("Teclados", "../audio/" + pasta + "/09 Keys Stem.wav", 9));
-        faixas.put(10, new Faixa("Coral", "../audio/" + pasta + "/10 Choir Stem.wav", 10));
-        faixas.put(11, new Faixa("Hits", "../audio/" + pasta + "/11 Hits Stem.wav", 11));
-        faixas.put(12, new Faixa("Efeitos (FX)", "../audio/" + pasta + "/12 FX Stem.wav", 12));
+        if (pasta.equals("musica1")) {
+            faixas.put(1,  new Faixa("Kit Bateria",        "../audio/" + pasta + "/01 Kit Stem.wav", 1));
+            faixas.put(2,  new Faixa("Elec Drum",          "../audio/" + pasta + "/02 Elec Drum Stem.wav", 2));
+            faixas.put(3,  new Faixa("Percussao",          "../audio/" + pasta + "/03 Percussion Stem.wav", 3));
+            faixas.put(4,  new Faixa("Baixo",              "../audio/" + pasta + "/04 Bass Stem.wav", 4));
+            faixas.put(5,  new Faixa("Voz Principal",      "../audio/" + pasta + "/05 Ld Voc Stem.wav", 5));
+            faixas.put(6,  new Faixa("Adlibs",             "../audio/" + pasta + "/06 Adlibs Stem.wav", 6));
+            faixas.put(7,  new Faixa("Backing Vocal",      "../audio/" + pasta + "/07 BGV Stem.wav", 7));
+            faixas.put(8,  new Faixa("Sintetizador",       "../audio/" + pasta + "/08 Synth Stem.wav", 8));
+            faixas.put(9,  new Faixa("Teclados",           "../audio/" + pasta + "/09 Keys Stem.wav", 9));
+            faixas.put(10, new Faixa("Coral",              "../audio/" + pasta + "/10 Choir Stem.wav", 10));
+            faixas.put(11, new Faixa("Hits",               "../audio/" + pasta + "/11 Hits Stem.wav", 11));
+            faixas.put(12, new Faixa("Efeitos (FX)",       "../audio/" + pasta + "/12 FX Stem.wav", 12));
+            faixas.put(13, new Faixa("Acapella",           "../audio/" + pasta + "/Acapella Stem.wav", 13));
+            faixas.put(14, new Faixa("Backing Stem",       "../audio/" + pasta + "/Backing Stem.wav", 14));
+            faixas.put(15, new Faixa("Drum & Bass Stem",   "../audio/" + pasta + "/Drum & Bass Stem.wav", 15));
+            faixas.put(16, new Faixa("Drums Stem",         "../audio/" + pasta + "/Drums Stem.wav", 16));
+            faixas.put(17, new Faixa("Finesse Full",       "../audio/" + pasta + "/Finesse.wav", 17));
+            faixas.put(18, new Faixa("Instrumental",       "../audio/" + pasta + "/Instrumental.wav", 18));
+
+        } else if (pasta.equals("musica2")) {
+            faixas.put(1,  new Faixa("808 Bass",          "../audio/" + pasta + "/808.wav", 1));
+            faixas.put(2,  new Faixa("Adlibs",            "../audio/" + pasta + "/Adlibs.wav", 2));
+            faixas.put(3,  new Faixa("Bass",              "../audio/" + pasta + "/Bass.wav", 3));
+            faixas.put(4,  new Faixa("Backing Vocal",     "../audio/" + pasta + "/BGV.wav", 4));
+            faixas.put(5,  new Faixa("Drums",             "../audio/" + pasta + "/Drums.wav", 5));
+            faixas.put(6,  new Faixa("FX Vocal",          "../audio/" + pasta + "/FX Vox.wav", 6));
+            faixas.put(7,  new Faixa("FX",                "../audio/" + pasta + "/FX.wav", 7));
+            faixas.put(8,  new Faixa("Guitars",           "../audio/" + pasta + "/Guitars.wav", 8));
+            faixas.put(9,  new Faixa("Keys",              "../audio/" + pasta + "/Keys.wav", 9));
+            faixas.put(10, new Faixa("Lead Vocal",        "../audio/" + pasta + "/Ld Voc.wav", 10));
+            faixas.put(11, new Faixa("Percussion",        "../audio/" + pasta + "/Percussion.wav", 11));
+            faixas.put(12, new Faixa("Synths",            "../audio/" + pasta + "/Synths.wav", 12));
+
+        } else if (pasta.equals("musica3")) {
+            faixas.put(1,  new Faixa("808",               "../audio/" + pasta + "/808-01.wav", 1));
+            faixas.put(2,  new Faixa("Ad Lips",           "../audio/" + pasta + "/Ad Lips-01.wav", 2));
+            faixas.put(3,  new Faixa("Bass",              "../audio/" + pasta + "/Bass-01.wav", 3));
+            faixas.put(4,  new Faixa("Backing Vocal",     "../audio/" + pasta + "/BGV-01.wav", 4));
+            faixas.put(5,  new Faixa("Clicks",            "../audio/" + pasta + "/Clicks-01.wav", 5));
+            faixas.put(6,  new Faixa("FX",                "../audio/" + pasta + "/FX-01.wav", 6));
+            faixas.put(7,  new Faixa("Guitars",           "../audio/" + pasta + "/Guitars-01.wav", 7));
+            faixas.put(8,  new Faixa("Hi-Hat",            "../audio/" + pasta + "/Hit Hat-01.wav", 8));
+            faixas.put(9,  new Faixa("Kick",              "../audio/" + pasta + "/Kick-01.wav", 9));
+            faixas.put(10, new Faixa("Lead Vocal",        "../audio/" + pasta + "/Lead Vocal-01.wav", 10));
+            faixas.put(11, new Faixa("Percussions",       "../audio/" + pasta + "/Percussions-01.wav", 11));
+            faixas.put(12, new Faixa("Sample Loop",       "../audio/" + pasta + "/Sample Loop-01.wav", 12));
+            faixas.put(13, new Faixa("Snare",             "../audio/" + pasta + "/Snare-01.wav", 13));
+            faixas.put(14, new Faixa("Synth Lead",        "../audio/" + pasta + "/Synth Lead-01.wav", 14));
+        }
+
+        CountDownLatch latch = new CountDownLatch(faixas.size());
 
         // Cria e dispara uma Thread dedicada para cada faixa carregar seu Clip em
         // paralelo
         for (Faixa faixa : faixas.values()) {
+            faixa.setLatchPronto(latch);
             new Thread(faixa).start(); // Dispara a execução do método run() da Faixa
+        }
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

@@ -1,5 +1,6 @@
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -28,6 +29,9 @@ public class Faixa implements Runnable {
     // Posição atual da música em frames
     private volatile double posicaoFrame;
 
+    // Sincronizador de inicialização
+    private CountDownLatch latchPronto;
+
     // Construtor
     public Faixa(String nome, String caminhoArquivo, int numeroTecla) {
         this.nome = nome;
@@ -38,6 +42,10 @@ public class Faixa implements Runnable {
         ativo = true;
         bpm = 120;
         posicaoFrame = 0;
+    }
+
+    public void setLatchPronto(CountDownLatch latchPronto) {
+        this.latchPronto = latchPronto;
     }
 
     public int getNumeroTecla() {
@@ -242,25 +250,34 @@ public class Faixa implements Runnable {
                 nome + "] carregado com sucesso."
             );
 
-            // Começa parado
-            while (ativo) {
-
-                if (!tocando) {
-
-                    Thread.sleep(20);
-
-                    continue;
-                }
-
-                reproduzirBloco();
-            }
-
         } catch (Exception e) {
 
             System.err.println(
                 "Erro ao carregar a faixa [" +
                 nome + "]: " + e.getMessage()
             );
+        } finally {
+            if (latchPronto != null) {
+                latchPronto.countDown();
+            }
+        }
+
+        // Começa parado
+        while (ativo) {
+
+            if (!tocando) {
+
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+
+                continue;
+            }
+
+            reproduzirBloco();
         }
     }
 

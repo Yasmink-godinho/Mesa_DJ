@@ -11,8 +11,8 @@ public class App {
         // Catálogo de músicas disponíveis
         Map<String, Musica> catalogo = new HashMap<>();
         catalogo.put("1", new Musica(1, "Finesse - Bruno Mars", "musica1"));
-        catalogo.put("2", new Musica(2, "Música 2 (Stems)", "musica2"));
-        catalogo.put("3", new Musica(3, "Música 3 (Stems)", "musica3"));
+        catalogo.put("2", new Musica(2, "Dark Horse - Katy Perry", "musica2"));
+        catalogo.put("3", new Musica(3, "Bad Guy - Billie Eilish", "musica3"));
 
         // Inicializa com a Música 1
         Musica musicaAtual = catalogo.get("1");
@@ -21,43 +21,35 @@ public class App {
 
         MesaDJ mesa = new MesaDJ(musicaAtual);
 
-        // Aguarda carregar o áudio na memória
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
         Scanner scanner = new Scanner(System.in);
         boolean executando = true;
 
         exibirInstrucoes(musicaAtual);
 
-        
         while (executando) {
             System.out.print("\nComando > ");
             String entrada = scanner.nextLine().trim().toLowerCase();
 
             if (entrada.equals("bpm+")) {
-            mesa.ajustarBpmGlobal(10);
-            continue;
-             }
-
-            
-             if (entrada.equals("bpm-")) {
-            mesa.ajustarBpmGlobal(-10);
-            continue;
-             }
-            
-             if (entrada.startsWith("bpm ")) {
-            try {
-                int novoBpm = Integer.parseInt(entrada.substring(4));
-                mesa.definirBpmGlobal(novoBpm);
-            } catch (NumberFormatException e) {
-                System.out.println("X BPM inválido. Digite, por exemplo: bpm 140");
+                mesa.ajustarBpmGlobal(10);
+                continue;
             }
-            continue;
-          }
+
+            if (entrada.equals("bpm-")) {
+                mesa.ajustarBpmGlobal(-10);
+                continue;
+            }
+
+            if (entrada.startsWith("bpm ")) {
+                try {
+                    int novoBpm = Integer.parseInt(entrada.substring(4));
+                    mesa.definirBpmGlobal(novoBpm);
+                } catch (NumberFormatException e) {
+                    System.out.println("X BPM inválido. Digite, por exemplo: bpm 140");
+                }
+                continue;
+            }
+
             // 1. Tocar faixa individual: apenas números (ex: "1", "2", "12", "18")
             if (entrada.matches("\\d+")) {
                 int numeroFaixa = Integer.parseInt(entrada);
@@ -121,16 +113,19 @@ public class App {
     }
 
     private static void exibirInstrucoes(Musica musicaAtual) {
+        int total = musicaAtual.getFaixas().size();
         System.out.println("\n-----------------------------------------");
         System.out.println("🎵 Música Atual: " + musicaAtual.getNome());
         System.out.println("-----------------------------------------");
-        System.out.println(" • Digite (1 a 12)  -> TOCAR/RETOMAR faixa individual");
-        System.out.println(" • Digite (p1 a p12) -> PAUSAR faixa individual");
+        System.out.println(" • Digite (1 a " + total + ")    -> TOCAR/RETOMAR faixa individual");
+        System.out.println(" • Digite (p1 a p" + total + ")  -> PAUSAR faixa individual");
+        System.out.println(" • Digite 'bpm+' / 'bpm-' -> Aumentar/Diminuir BPM em 10");
+        System.out.println(" • Digite 'bpm <valor>'  -> Definir BPM exato (ex: bpm 140)");
         System.out.println(" • Digite 't'            -> Pausar/Continuar Tudo");
-        System.out.println(" • Digite 'mute'            -> Master Play/Mute Geral");
+        System.out.println(" • Digite 'mute'         -> Master Play/Mute Geral");
         System.out.println(" • Digite 's'            -> Ver Status dos canais");
         System.out.println(" • Digite 'm1', 'm2', 'm3' -> Trocar de Música");
-        System.out.println(" • Digite 'ajuda'       -> Mostrar instruçoes novamente");
+        System.out.println(" • Digite 'ajuda'        -> Mostrar instruçoes novamente");
         System.out.println(" • Digite 'sair'         -> Encerrar a Mesa");
         System.out.println("-----------------------------------------");
     }
