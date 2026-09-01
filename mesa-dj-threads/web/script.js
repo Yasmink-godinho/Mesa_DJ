@@ -21,8 +21,7 @@ async function carregarMusicas() {
   }
 }
 
-// Mantém o <select> sincronizado caso a música tenha sido trocada
-// por outro navegador conectado no mesmo servidor.
+// Mantém o <select> sincronizado caso a música tenha sido trocada por outro navegador conectado no mesmo servidor.
 function sincronizarSelecaoMusica(nomeMusicaAtual) {
   for (const opcao of elMusicaSelect.options) {
     if (opcao.textContent === nomeMusicaAtual && elMusicaSelect.value !== opcao.value) {
@@ -32,8 +31,7 @@ function sincronizarSelecaoMusica(nomeMusicaAtual) {
   }
 }
 
-// Cria ou atualiza os botões de canal sem recriar o DOM inteiro
-// (evita que o botão "pisque" a cada atualização de 2s).
+// Cria ou atualiza os botões de canal sem recriar o DOM inteiro (evita que o botão "pisque" a cada atualização de 2s).
 function renderizarCanais(faixas) {
   const teclasAtuais = new Set(faixas.map(f => String(f.tecla)));
 
@@ -52,8 +50,12 @@ function renderizarCanais(faixas) {
       elCanal.dataset.tecla = faixa.tecla;
       elCanal.innerHTML = `
         <div class="canal-cabecalho">
-          <span class="canal-tecla">${String(faixa.tecla).padStart(2, '0')}</span>
+          <span class="canal-tecla">${faixa.tecla}</span>
           <span class="canal-nome"></span>
+        </div>
+        <div class="canal-onda">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
         <button class="canal-botao" type="button"></button>
       `;
@@ -65,9 +67,7 @@ function renderizarCanais(faixas) {
       elCanais.appendChild(elCanal);
     }
 
-    // Sempre atualiza o nome, mesmo quando o elemento já existia —
-    // depois de trocar de música, a mesma tecla pode representar
-    // um instrumento diferente.
+    // Sempre atualiza o nome, mesmo quando o elemento já existia. Depois de trocar de música, a mesma tecla pode representar um instrumento diferente.
     elCanal.querySelector('.canal-nome').textContent = faixa.nome;
 
     const botao = elCanal.querySelector('.canal-botao');
@@ -130,6 +130,5 @@ document.getElementById('sair').addEventListener('click', async () => {
   elStatusConexao.textContent = 'encerrado';
 });
 
-// Inicialização + painel ao vivo (atualiza a cada 2s, do lado do navegador)
 carregarMusicas().then(atualizarStatus);
 setInterval(atualizarStatus, 2000);
