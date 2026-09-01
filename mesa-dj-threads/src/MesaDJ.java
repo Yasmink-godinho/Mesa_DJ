@@ -1,22 +1,3 @@
-/**
- * MesaDJ (Comandos):
- *
- * Esta classe é o "controlador" da aplicação: ela recebe as ações do
- * usuário (que chegam através de botões da interface) e as traduz em
- * chamadas de método sobre os objetos corretos.
- *
- * A MesaDJ é INTENCIONALMENTE "burra" em relação a áudio e concorrência:
- *  - NÃO decodifica nem reproduz som (isso é feito dentro de Faixa).
- *  - NÃO cria nem inicia Threads (isso é feito dentro de Musica.carregarFaixas()).
- *  - NÃO decide como o painel de status deve ser desenhado.
- *
- * A MesaDJ só sabe três coisas:
- *  1) quais ações existem (tocar, pausar, status, sair, e agora também
- *     os controles globais de tocar/pausar tudo e mutar tudo);
- *  2) qual Faixa (ou conjunto de Faixas, via Musica) cada ação afeta;
- *  3) qual método já pronto deve chamar para executar aquela ação.
- */
-
 import java.util.LinkedHashMap; // Mapa que preserva a ordem de inserção
 import java.util.Map; // Interface de mapeamento chave -> valor
 
