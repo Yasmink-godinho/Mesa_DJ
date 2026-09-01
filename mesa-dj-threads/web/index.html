@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mesa DJ — Mixer Concorrente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topo">
+    <h1><span class="eq-icone"><span></span><span></span><span></span></span>MESA DJ</h1>
+    <div class="seletor-musica">
+      <label for="musica">FAIXA</label>
+      <select id="musica"></select>
+    </div>
+    <div class="status-conexao" id="statusConexao">conectando…</div>
+  </header>
+
+  <main class="canais" id="canais">
+    <!-- canais (faixas) são inseridos aqui via script.js -->
+  </main>
+
+  <footer class="master">
+    <div class="bpm-bloco">
+      <button id="bpmMenos" class="botao-bpm" title="Diminuir BPM">−</button>
+      <div class="bpm-leitura">
+        <span class="bpm-valor" id="bpmValor">---</span>
+        <span class="bpm-unidade">BPM</span>
+      </div>
+      <button id="bpmMais" class="botao-bpm" title="Aumentar BPM">+</button>
+    </div>
+
+    <button id="pausarTudo" class="botao-master">TOCAR/PAUSAR</button>
+    <button id="mute" class="botao-master">MUTE</button>
+    <button id="sair" class="botao-master botao-sair" title="Encerrar">⏻</button>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

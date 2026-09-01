@@ -32,6 +32,16 @@ public class Faixa implements Runnable {
     // Sincronizador de inicialização
     private CountDownLatch latchPronto;
 
+    // Marca o instante real (nanoTime) correspondente ao valor atual
+    // de posicaoFrame — usado para manter a faixa sincronizada
+    // enquanto está pausada (ver avancarPosicaoEmSilencio).
+    private long ultimoInstante;
+
+    // Só true depois que a faixa tocou pela primeira vez. Antes disso,
+    // uma pausa não deve "andar" o tempo — a faixa ainda nem começou,
+    // então o certo é continuar do zero na primeira vez que tocar.
+    private volatile boolean jaComecouATocar;
+
     // Construtor
     public Faixa(String nome, String caminhoArquivo, int numeroTecla) {
         this.nome = nome;
@@ -112,6 +122,7 @@ public class Faixa implements Runnable {
             posicaoFrame = 0;
 
             tocando = true;
+            jaComecouATocar = true;
 
             linhaAudio.start();
 
@@ -151,6 +162,7 @@ public class Faixa implements Runnable {
         if (linhaAudio != null && !tocando && ativo) {
 
             tocando = true;
+            jaComecouATocar = true;
 
             linhaAudio.start();
 
@@ -263,9 +275,15 @@ public class Faixa implements Runnable {
         }
 
         // Começa parado
+        ultimoInstante = System.nanoTime();
+
         while (ativo) {
 
             if (!tocando) {
+
+                if (jaComecouATocar) {
+                    avancarPosicaoEmSilencio();
+                }
 
                 try {
                     Thread.sleep(20);
@@ -278,6 +296,45 @@ public class Faixa implements Runnable {
             }
 
             reproduzirBloco();
+            ultimoInstante = System.nanoTime();
+        }
+    }
+
+    // =========================================================
+    // SINCRONIA DURANTE A PAUSA
+    //
+    // Sem isso, pausar "congela" a posição da faixa: ao despausar,
+    // ela volta a tocar de onde parou, perdendo exatamente o tempo
+    // que ficou pausada em relação às faixas que continuaram.
+    // Aqui a posição continua avançando em tempo real mesmo com o
+    // áudio mudo, então ao despausar ela já está onde deveria estar
+    // — como se nunca tivesse parado.
+    // =========================================================
+
+    private void avancarPosicaoEmSilencio() {
+
+        if (formato == null || audioBytes == null) {
+            return;
+        }
+
+        long agora = System.nanoTime();
+        double segundosPassados = (agora - ultimoInstante) / 1_000_000_000.0;
+        ultimoInstante = agora;
+
+        int bytesPorFrame = formato.getChannels() * 2;
+        int totalFrames = audioBytes.length / bytesPorFrame;
+
+        if (totalFrames == 0) {
+            return;
+        }
+
+        double velocidade = (double) bpm / 120.0;
+        double framesPassados = segundosPassados * formato.getSampleRate() * velocidade;
+
+        posicaoFrame += framesPassados;
+
+        if (posicaoFrame >= totalFrames) {
+            posicaoFrame = posicaoFrame % totalFrames;
         }
     }
 
