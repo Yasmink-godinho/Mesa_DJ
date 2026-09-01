@@ -255,11 +255,12 @@ public class Faixa implements Runnable {
             linhaAudio =
                 (SourceDataLine) AudioSystem.getLine(info);
 
-            // Buffer maior que o padrão (~350ms de folga) — com muitas
-            // faixas tocando ao mesmo tempo, o padrão é apertado demais
-            // e a linha fica sem dado pra tocar, causando engasgos.
+            // Buffer maior que o padrão, mas moderado (~150ms de folga)
+            // — grande o bastante pra aguentar várias faixas tocando
+            // junto sem engasgar, sem exagerar a ponto de aumentar
+            // demais a variação de quando cada linha começa a soar.
             int tamanhoBuffer =
-                (int) (formato.getSampleRate() * formato.getFrameSize() * 0.35);
+                (int) (formato.getSampleRate() * formato.getFrameSize() * 0.15);
 
             linhaAudio.open(formato, tamanhoBuffer);
 
@@ -391,7 +392,7 @@ public class Faixa implements Runnable {
         // para a placa de áudio de cada vez. Maior aqui = menos vezes
         // que a thread precisa acordar pra alimentar a linha, o que
         // ajuda quando várias faixas competem por CPU ao mesmo tempo.
-        int framesSaida = 4096;
+        int framesSaida = 2048;
 
         byte[] bufferSaida =
             new byte[framesSaida * bytesPorFrame];
