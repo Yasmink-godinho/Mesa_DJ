@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class App {
     public static void main(String[] args) {
@@ -22,11 +23,33 @@ public class App {
         MesaDJ mesa = new MesaDJ(musicaAtual);
 
         Scanner scanner = new Scanner(System.in);
-        boolean executando = true;
+        AtomicBoolean executando = new AtomicBoolean(true);
+
+        Thread painelStatus = new Thread(() -> {
+           while (executando.get()) {
+                try {
+                    Thread.sleep(5000);
+
+            System.out.println("\n--- PAINEL DE STATUS AO VIVO ---");
+
+            mesa.status().forEach((tecla, info) ->
+                System.out.println(" [Canal " + tecla + "] -> " + info)
+            );
+
+            System.out.println("--------------------------------");
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            break;
+        }
+    }
+ });
+
+        painelStatus.start();
 
         exibirInstrucoes(musicaAtual);
 
-        while (executando) {
+        while (executando.get()) {
             System.out.print("\nComando > ");
             String entrada = scanner.nextLine().trim().toLowerCase();
 
@@ -99,7 +122,7 @@ public class App {
                         break;
                     case "sair":
                         mesa.sair();
-                        executando = false;
+                        executando.set(false);
                         break;
                     default:
                         System.out.println("Comando nao reconhecido. Digite 'ajuda' para ver os comandos.");
